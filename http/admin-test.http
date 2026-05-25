@@ -1,0 +1,51 @@
+### 1. 최고 관리자(MANAGER)용 가짜 토큰 즉석 발급
+GET http://localhost:8080/api/test/token?email=manager@test.com
+
+> {%
+    // 응답 바디에서 생성된 가짜 MANAGER 토큰을 전역 변수에 자동 저장!
+    client.global.set("auth_token", response.body.token);
+    client.log("치트키 발동! MANAGER 토큰 자동 충전 완료: " + client.global.get("auth_token"));
+%}
+
+### 2. 멀티 스태프(STAFF)용 가짜 토큰 즉석 발급
+GET http://localhost:8080/api/test/token?email=multi_staff@test.com&role=STAFF
+
+> {%
+    // 응답 바디에서 생성된 가짜 STAFF 토큰으로 스왑!
+    client.global.set("auth_token", response.body.token);
+    client.log("치트키 발동! STAFF 토큰 자동 충전 완료!");
+%}
+
+
+### ========================================================
+### 💡 아래 도메인 실무 API들은 위의 토큰 발급 1번이나 2번을 누르고 실행하면 자동 매핑됩니다!
+### ========================================================
+
+### 3. [일반 정보 수정] 매니저 또는 해당 지점 스태프 성공 (강남점: partner-1)
+POST http://localhost:8080/api/partners/partner-2
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "강남점 이름 변경",
+  "location": "서울시 강남구 테헤란로"
+}
+
+### 4. [일반 정보 수정] 권한 없는 지점 스태프 호출 시 실패 (multi_staff가 홍대점 partner-3 수정 시 -> 403 Expected)
+POST http://localhost:8080/api/partners/partner-3
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "권한 탈취 시도",
+  "location": "서울시 마포구"
+}
+
+### 5. [상태 변경] 오직 매니저만 가능 (1번 실행 후 호출 시 204 / 2번 실행 후 호출 시 403 Expected)
+POST http://localhost:8080/api/partners/partner-1/status
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "status": "ACTIVE"
+}
