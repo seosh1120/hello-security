@@ -23,8 +23,8 @@ GET http://localhost:8080/api/test/token?email=multi_staff@test.com&role=STAFF
 
 ### 3. [일반 정보 수정] 매니저 또는 해당 지점 스태프 성공 (강남점: partner-1)
 POST http://localhost:8080/api/partners/partner-2
-Authorization: Bearer {{auth_token}}
-X-TEST-EMAIL: manager@test.com
+#Authorization: Bearer {{auth_token}}
+X-TEST-EMAIL: multi_staff@test.com
 Content-Type: application/json
 
 {

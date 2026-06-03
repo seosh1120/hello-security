@@ -21,6 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 class SecurityConfig(
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
     private val testAuthenticationFilterProvider: ObjectProvider<TestAuthenticationFilter>,
+    private val partnerAuthorizationManager: PartnerAuthorizationManager,
     private val applicationContext: ApplicationContext
 ) {
 
@@ -45,10 +46,12 @@ class SecurityConfig(
                     .hasRole("MANAGER")
 
                     // 💡 [우선순위 2] 일반 수정 API: 매니저 프리패스 / 스태프는 자기 지점 검증 수행
-                    .requestMatchers(HttpMethod.POST, "/api/partners/{partnerId}").check(
-                        "hasRole('MANAGER') or (hasRole('STAFF') and @partnerChecker.hasAccess(authentication, #partnerId))",
-                        applicationContext
-                    )
+//                    .requestMatchers(HttpMethod.POST, "/api/partners/{partnerId}").check(
+//                        "hasRole('MANAGER') or (hasRole('STAFF') and @partnerChecker.hasAccess(authentication, #partnerId))",
+//                        applicationContext
+//                    )
+                    .requestMatchers(HttpMethod.POST, "/api/partners/{partnerId}")
+                    .access(partnerAuthorizationManager)
 
                     // 💡 [우선순위 3] 나머지 파트너 API 통합 관문
                     .requestMatchers("/api/partners/**")
