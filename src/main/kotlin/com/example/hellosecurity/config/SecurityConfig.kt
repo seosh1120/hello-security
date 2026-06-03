@@ -1,6 +1,8 @@
 package com.example.hellosecurity.config
 
 import com.example.hellosecurity.security.JwtAuthenticationFilter
+import com.example.hellosecurity.security.TestAuthenticationFilter
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -18,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 class SecurityConfig(
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
+    private val testAuthenticationFilterProvider: ObjectProvider<TestAuthenticationFilter>,
     private val applicationContext: ApplicationContext
 ) {
 
@@ -52,7 +55,13 @@ class SecurityConfig(
                     .hasAnyRole("MANAGER", "STAFF")
                     .anyRequest().authenticated()
             }
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+        testAuthenticationFilterProvider.ifAvailable {
+            http.addFilterBefore(
+                it,
+                UsernamePasswordAuthenticationFilter::class.java
+            )
+        }
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
 
         return http.build()
     }

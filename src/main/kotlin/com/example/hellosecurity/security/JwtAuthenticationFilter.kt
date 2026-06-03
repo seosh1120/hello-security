@@ -11,7 +11,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.userdetails.User
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
@@ -34,10 +33,12 @@ class JwtAuthenticationFilter(
         val requestURI = request.requestURI
 
         // Bearer 토큰 형식이 아닐 때 (비인증 퍼블릭 API나 H2 콘솔 접근 등)
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (SecurityContextHolder.getContext().authentication != null || authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response)
             return
         }
+
+        log.info("==========jwtAuthenticationFilter 사용해서 로그인 시도합니다.")
 
         val token = authHeader.substring(7)
 
